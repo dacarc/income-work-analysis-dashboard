@@ -12,43 +12,42 @@ import pandas as pd
 import plotly.express as px
 
 # ---------------- PAGE CONFIG ----------------
-# I set the page layout to wide so the dashboard looks cleaner and easier to read
 st.set_page_config(
     page_title="Income & Work Analysis Dashboard",
     layout="wide"
 )
 
 # ---------------- TITLE ----------------
-# This is the main title of my dashboard
 st.title("Income and Work Analysis Dashboard")
 
-# I added this description to explain what the app is showing
+# ---------------- RECRUITER-FACING DESCRIPTION ----------------
 st.markdown("""
-This dashboard lets me explore how income and work patterns change based on telework status.
-I built this to make the data easier to understand through interactive visualizations.
+### About This Project
+
+I built this interactive dashboard to analyze how income and work behavior vary across individuals using real labor survey data.
+
+The application allows users to explore:
+- Income trends across different ages  
+- Distribution of work efficiency  
+- Differences between telework and non-telework employees  
+
+This project demonstrates my ability to clean data, create new features, and build interactive data applications using Python and Streamlit.
 """)
 
 # ---------------- LOAD DATA ----------------
-# I load the dataset that I cleaned and analyzed in my project
 df = pd.read_csv("IPUMS.csv")
 
-# ---------------- DATA CLEANING ----------------
-# I replace missing telework values with 0 (assuming no telework pay)
+# ---------------- CLEAN DATA ----------------
 df['TELWRKPAY'] = df['TELWRKPAY'].fillna(0)
 
-# I remove invalid income values based on dataset coding rules
 df = df[df['INCWAGE'] < 99999999]
-
-# I remove invalid work hour values
 df = df[df['WKSWORK1'] > 0]
 df = df[(df['UHRSWORKT'] > 0) & (df['UHRSWORKT'] < 997)]
 
 # ---------------- FEATURE ENGINEERING ----------------
-# I created a new variable to measure efficiency (income per work effort)
 df['HourlyEfficiency'] = df['INCWAGE'] / (df['WKSWORK1'] * df['UHRSWORKT'])
 
 # ---------------- SIDEBAR FILTER ----------------
-# I added a filter so users can compare telework vs non-telework workers
 st.sidebar.header("Filters")
 
 telework_option = st.sidebar.selectbox(
@@ -57,7 +56,6 @@ telework_option = st.sidebar.selectbox(
     format_func=lambda x: "No Telework Pay" if x == 0 else "Receives Telework Pay"
 )
 
-# I filter the dataset based on user selection
 df = df[df['TELWRKPAY'] == telework_option]
 
 # ---------------- LAYOUT ----------------
@@ -69,7 +67,6 @@ col1, col2 = st.columns(2)
 with col1:
     st.markdown("### Income by Age")
 
-    # I group the data to show average income by age
     income_age = df.groupby("AGE")["INCWAGE"].mean().reset_index()
 
     fig1 = px.line(
@@ -95,7 +92,6 @@ with col2:
     st.plotly_chart(fig2, use_container_width=True)
 
 # ---------------- SUMMARY ----------------
-# I added this section to show key statistics after filtering
 with st.expander("View Summary Statistics"):
     st.write("Number of observations:", df.shape[0])
     st.write("Average income:", round(df["INCWAGE"].mean(), 2))
