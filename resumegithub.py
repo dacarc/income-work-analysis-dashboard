@@ -160,5 +160,3 @@ This project highlights strong skills in data manipulation, exploratory data ana
 # pandas
 # plotly
 #
-
-"""Now you have `streamlit_app.py` and `requirements.txt` saved in your Colab environment. You can download these files and upload them to your GitHub repository. Don't forget to include `IPUMS.csv` as well, as your app depends on it."""
