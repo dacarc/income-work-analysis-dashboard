@@ -12,33 +12,43 @@ import pandas as pd
 import plotly.express as px
 
 # ---------------- PAGE CONFIG ----------------
+# I set the page layout to wide so the dashboard looks cleaner and easier to read
 st.set_page_config(
     page_title="Income & Work Analysis Dashboard",
     layout="wide"
 )
 
 # ---------------- TITLE ----------------
+# This is the main title of my dashboard
 st.title("Income and Work Analysis Dashboard")
 
+# I added this description to explain what the app is showing
 st.markdown("""
-This interactive dashboard explores how income and work patterns vary across individuals.
-It allows users to filter by telework status and observe differences in income and work efficiency.
+This dashboard lets me explore how income and work patterns change based on telework status.
+I built this to make the data easier to understand through interactive visualizations.
 """)
 
 # ---------------- LOAD DATA ----------------
+# I load the dataset that I cleaned and analyzed in my project
 df = pd.read_csv("IPUMS.csv")
 
-# ---------------- CLEAN DATA ----------------
+# ---------------- DATA CLEANING ----------------
+# I replace missing telework values with 0 (assuming no telework pay)
 df['TELWRKPAY'] = df['TELWRKPAY'].fillna(0)
 
+# I remove invalid income values based on dataset coding rules
 df = df[df['INCWAGE'] < 99999999]
+
+# I remove invalid work hour values
 df = df[df['WKSWORK1'] > 0]
 df = df[(df['UHRSWORKT'] > 0) & (df['UHRSWORKT'] < 997)]
 
 # ---------------- FEATURE ENGINEERING ----------------
+# I created a new variable to measure efficiency (income per work effort)
 df['HourlyEfficiency'] = df['INCWAGE'] / (df['WKSWORK1'] * df['UHRSWORKT'])
 
 # ---------------- SIDEBAR FILTER ----------------
+# I added a filter so users can compare telework vs non-telework workers
 st.sidebar.header("Filters")
 
 telework_option = st.sidebar.selectbox(
@@ -47,6 +57,7 @@ telework_option = st.sidebar.selectbox(
     format_func=lambda x: "No Telework Pay" if x == 0 else "Receives Telework Pay"
 )
 
+# I filter the dataset based on user selection
 df = df[df['TELWRKPAY'] == telework_option]
 
 # ---------------- LAYOUT ----------------
@@ -58,6 +69,7 @@ col1, col2 = st.columns(2)
 with col1:
     st.markdown("### Income by Age")
 
+    # I group the data to show average income by age
     income_age = df.groupby("AGE")["INCWAGE"].mean().reset_index()
 
     fig1 = px.line(
@@ -83,80 +95,8 @@ with col2:
     st.plotly_chart(fig2, use_container_width=True)
 
 # ---------------- SUMMARY ----------------
+# I added this section to show key statistics after filtering
 with st.expander("View Summary Statistics"):
     st.write("Number of observations:", df.shape[0])
-    st.write("Average income: $", round(df["INCWAGE"].mean(), 2))
+    st.write("Average income:", round(df["INCWAGE"].mean(), 2))
     st.write("Average hourly efficiency:", round(df["HourlyEfficiency"].mean(), 2))
-
-"""## Project Summary for Portfolio
-
-This interactive Streamlit application demonstrates a comprehensive data analysis workflow focused on income and work efficiency. It showcases proficiency in:
-
-*   **Data Loading & Cleaning:** Utilizing `pandas` to load a CSV dataset and perform essential data cleaning steps, including handling missing values and filtering irrelevant entries.
-*   **Feature Engineering:** Creating new meaningful features, such as 'HourlyEfficiency', from raw data.
-*   **Interactive Data Exploration:** Implementing `streamlit` to build an intuitive user interface with interactive filters (e.g., 'Telework Pay') that dynamically update the displayed analysis.
-*   **Data Visualization:** Generating insightful and professional-grade visualizations using `plotly.express` to represent complex data distributions and relationships (e.g., Average Income by Age, Hourly Efficiency Distribution).
-*   **Reproducible Research:** Organizing code in a clear and modular fashion, making the analysis transparent and easy to follow.
-
-This project highlights strong skills in data manipulation, exploratory data analysis, and building interactive web applications for data presentation. The ability to transform raw data into actionable insights through a user-friendly interface is crucial for data-driven roles.
-"""
-
-# Commented out IPython magic to ensure Python compatibility.
-# %%writefile streamlit_app.py
-# import streamlit as st
-# import pandas as pd
-# import plotly.express as px
-# 
-# # Configure page settings for a wider layout
-# st.set_page_config(layout="wide")
-# 
-# st.title("Income and Work Analysis Application")
-# st.markdown("""
-# This interactive application explores income and work efficiency based on various demographic and employment factors.
-# Use the filters below to refine the dataset and observe the impact on average income and hourly efficiency distributions.
-# """)
-# 
-# df = pd.read_csv("IPUMS.csv")
-# 
-# # Data Cleaning and Preparation
-# df['TELWRKPAY'] = df['TELWRKPAY'].fillna(0)
-# 
-# df = df[df['INCWAGE'] < 99999999]
-# df = df[df['WKSWORK1'] > 0]
-# df = df[(df['UHRSWORKT'] > 0) & (df['UHRSWORKT'] < 997)]
-# 
-# df['HourlyEfficiency'] = df['INCWAGE'] / (df['WKSWORK1'] * df['UHRSWORKT'])
-# 
-# st.sidebar.header("Filter Options")
-# telework_option = st.sidebar.selectbox("Telework Pay (0 = No, 1 = Yes)", [0, 1], help="Filter data based on whether individuals receive telework pay.")
-# 
-# df = df[df['TELWRKPAY'] == telework_option]
-# 
-# st.subheader("Analysis Results")
-# 
-# # Create columns for layout if desired, otherwise stack them
-# col1, col2 = st.columns(2)
-# 
-# with col1:
-#     st.markdown("### Average Income by Age Group")
-#     income_age = df.groupby("AGE")["INCWAGE"].mean().reset_index()
-#     fig1 = px.line(income_age, x="AGE", y="INCWAGE", title="Average Income by Age")
-#     st.plotly_chart(fig1)
-# 
-# with col2:
-#     st.markdown("### Hourly Efficiency Distribution")
-#     fig2 = px.histogram(df, x="HourlyEfficiency", nbins=30, title="Distribution of Hourly Efficiency")
-#     st.plotly_chart(fig2)
-# 
-# with st.expander("View Data Summary"):
-#     st.write(f"**Number of rows after filtering:** {df.shape[0]}")
-#     st.write(f"**Average income after filtering:** ${round(df['INCWAGE'].mean(), 2):,.2f}")
-#     st.write(f"**Average hourly efficiency after filtering:** {round(df['HourlyEfficiency'].mean(), 2):,.2f}")
-#
-
-# Commented out IPython magic to ensure Python compatibility.
-# %%writefile requirements.txt
-# streamlit
-# pandas
-# plotly
-#
