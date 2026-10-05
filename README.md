@@ -31,4 +31,4 @@ The project explores how income varies by age and how work efficiency differs ac
 ---
 
 ## Author
-Diego Carcamo – Data Analytics (VCU)
+Diego Carcamo – Information Systems(VCU)
